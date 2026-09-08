@@ -53,10 +53,11 @@ const rawLatex = `
 P(\\text{Success}) &= \\frac{1}{1 + e^{-y}} \\[8pt]
 y &= \\left[ \\left( P(L) - \\frac{\\varnothing}{1 + 0.5a} \\right) \\cdot \\mu \\cdot (1.25)^a - 1 \\right]
 \\end{aligned}
-`;  
+`; 
+
 const liveLatex = `
 \\begin{aligned}
-P(\\text{Success}) &= \\frac{1}{1 + e^{-(${exponentTerm.toFixed(2)})}} \\[8pt]
+P(\\text{Success}) &= \\frac{1}{1 + e^{-y}} \\[8pt]
 y &= \\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \\cdot ${muVal} \\cdot (1.25)^{${aVal}} - 1 \\right] = ${exponentTerm.toFixed(2)}
 \\end{aligned}
 `;
