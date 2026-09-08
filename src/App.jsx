@@ -146,7 +146,7 @@ y &= \\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \
           <ControlSlider label="P(L) — Chance They Like You" value={pL} setValue={setPL} min={0} max={100} unit="%" />
           <ControlSlider label="Ø — Chance They Don't Like You" value={pNotL} setValue={setPNotL} min={0} max={100} unit="%" />
           <ControlSlider label="a — Number of Good Dates" value={a} setValue={setA} min={0} max={10} unit=" dates" />
-          <ControlSlider label="μ — Rizz Factor" value={mu} setValue={setMu} min={0.1} max={3.0} step={0.1} unit="x" />
+          <ControlSlider label="μ — Rizz Factor" value={mu} setValue={setMu} min={0.1} max={10.0} step={0.1} unit="x" />
         </div>
       </motion.div>
     </div>
