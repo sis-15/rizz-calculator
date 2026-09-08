@@ -1,91 +1,272 @@
-import { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
-function App() {
-  // Input state values
-  const [pL, setPL] = useState(50);     // P(L): Chance they like you (%)
-  const [pNotL, setPNotL] = useState(50); // Ø: Chance they don't like you (%)
-  const [a, setA] = useState(1);       // a: Number of good dates
-  const [mu, setMu] = useState(1);     // μ: Rizz factor
+export default function App() {
+  const [pL, setPL] = useState(65);
+  const [pNotL, setPNotL] = useState(20);
+  const [a, setA] = useState(2);
+  const [mu, setMu] = useState(1.2);
 
-  // Convert inputs to numbers
-  const plVal = Number(pL) / 100;       // Percentage to decimal
-  const pNotLVal = Number(pNotL) / 100; // Percentage to decimal
+  // Math conversions
+  const plVal = Number(pL) / 100;
+  const pNotLVal = Number(pNotL) / 100;
   const aVal = Number(a);
   const muVal = Number(mu);
 
-  // Math components
   const denominatorNotL = 1 + 0.5 * aVal;
   const effectiveLikability = plVal - (pNotLVal / denominatorNotL);
   const exponentTerm = (effectiveLikability * muVal * Math.pow(1.25, aVal)) - 1;
 
-  // Final P(Success) using standard sigmoid logistic function
   const pSuccess = 1 / (1 + Math.exp(-exponentTerm));
-  const successPercentage = (pSuccess * 100).toFixed(2);
+  const successPercentage = (pSuccess * 100).toFixed(1);
+
+  // Trigger celebratory confetti on high probability
+  useEffect(() => {
+    if (pSuccess >= 0.85) {
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.8 }
+      });
+    }
+  }, [pSuccess]);
+
+  // Dynamic theme status
+  const getStatus = (val) => {
+    if (val >= 75) return { label: '🔥 Lock It In', color: '#10B981' };
+    if (val >= 45) return { label: '⚡ Promising', color: '#F59E0B' };
+    return { label: '⚠️ High Risk Zone', color: '#EF4444' };
+  };
+
+  const status = getStatus(successPercentage);
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '450px', margin: 'auto' }}>
-      <h2>Success Probability Calculator</h2>
+    <div style={styles.container}>
+      {/* Dynamic Background Glow */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.2, 0.4, 0.2] 
+        }} 
+        transition={{ duration: 6, repeat: Infinity }}
+        style={{ ...styles.glow, backgroundColor: status.color }}
+      />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
-        <label>
-          <strong>P(L)</strong> - Chance they like you (%):
-          <input 
-            type="number" 
-            min="0"
-            max="100"
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        style={styles.card}
+      >
+        <header style={styles.header}>
+          <span style={{ fontSize: '0.85rem', letterSpacing: '2px', color: '#9CA3AF', textTransform: 'uppercase' }}>
+            Quantum Dating Protocol
+          </span>
+          <h1 style={styles.title}>Probability Engine</h1>
+        </header>
+
+        {/* Display Badge & Output */}
+        <div style={styles.outputContainer}>
+          <motion.span 
+            key={status.label}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ ...styles.badge, backgroundColor: `${status.color}22`, color: status.color, borderColor: `${status.color}44` }}
+          >
+            {status.label}
+          </motion.span>
+
+          <div style={styles.scoreRow}>
+            <AnimatePresence mode="popLayout">
+              <motion.span
+                key={successPercentage}
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                style={{ ...styles.score, color: status.color }}
+              >
+                {successPercentage}%
+              </motion.span>
+            </AnimatePresence>
+          </div>
+
+          <p style={styles.subtext}>Raw Value: {pSuccess.toFixed(4)}</p>
+        </div>
+
+        {/* Controls */}
+        <div style={styles.controls}>
+          <ControlSlider 
+            label="P(L) — Chance They Like You" 
             value={pL} 
-            onChange={(e) => setPL(e.target.value)} 
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            setValue={setPL} 
+            min={0} 
+            max={100} 
+            unit="%" 
           />
-        </label>
-
-        <label>
-          <strong>Ø</strong> - Chance they don't like you (%):
-          <input 
-            type="number" 
-            min="0"
-            max="100"
+          <ControlSlider 
+            label="Ø — Chance They Don't Like You" 
             value={pNotL} 
-            onChange={(e) => setPNotL(e.target.value)} 
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            setValue={setPNotL} 
+            min={0} 
+            max={100} 
+            unit="%" 
           />
-        </label>
-
-        <label>
-          <strong>a</strong> - Number of good dates:
-          <input 
-            type="number" 
-            min="0"
+          <ControlSlider 
+            label="a — Number of Good Dates" 
             value={a} 
-            onChange={(e) => setA(e.target.value)} 
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            setValue={setA} 
+            min={0} 
+            max={10} 
+            unit=" dates" 
           />
-        </label>
-
-        <label>
-          <strong>μ</strong> - Rizz factor:
-          <input 
-            type="number" 
-            step="0.1"
+          <ControlSlider 
+            label="μ — Rizz Factor" 
             value={mu} 
-            onChange={(e) => setMu(e.target.value)} 
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            setValue={setMu} 
+            min={0.1} 
+            max={3.0} 
+            step={0.1} 
+            unit="x" 
           />
-        </label>
-      </div>
-
-      {/* Output Display */}
-      <div style={{ marginTop: '2rem', padding: '1.2rem', backgroundColor: '#f4f4f5', borderRadius: '8px', textAlign: 'center' }}>
-        <h3 style={{ margin: 0, color: '#111827' }}>
-          P(Success): {successPercentage}%
-        </h3>
-        <p style={{ margin: '8px 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-          Raw Probability: {pSuccess.toFixed(4)}
-        </p>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
 
-export default App;
+// Reusable animated control component
+function ControlSlider({ label, value, setValue, min, max, step = 1, unit }) {
+  return (
+    <div style={styles.sliderGroup}>
+      <div style={styles.sliderHeader}>
+        <span style={styles.sliderLabel}>{label}</span>
+        <motion.span 
+          key={value}
+          initial={{ scale: 1.2 }}
+          animate={{ scale: 1 }}
+          style={styles.sliderVal}
+        >
+          {value}{unit}
+        </motion.span>
+      </div>
+      <input 
+        type="range" 
+        min={min} 
+        max={max} 
+        step={step}
+        value={value} 
+        onChange={(e) => setValue(e.target.value)}
+        style={styles.slider}
+      />
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#090D16',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
+    position: 'relative',
+    overflow: 'hidden',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    color: '#F9FAFB'
+  },
+  glow: {
+    position: 'absolute',
+    width: '400px',
+    height: '400px',
+    borderRadius: '50%',
+    filter: 'blur(100px)',
+    pointerEvents: 'none',
+    top: '20%',
+    left: 'calc(50% - 200px)',
+  },
+  card: {
+    width: '100%',
+    maxWidth: '440px',
+    backgroundColor: 'rgba(17, 24, 39, 0.75)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderRadius: '24px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    padding: '2rem',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+    zIndex: 1,
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '1.5rem',
+  },
+  title: {
+    margin: '4px 0 0',
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#FFFFFF'
+  },
+  outputContainer: {
+    textAlign: 'center',
+    padding: '1.25rem',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    marginBottom: '1.5rem',
+  },
+  badge: {
+    display: 'inline-block',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    border: '1px solid',
+    marginBottom: '0.5rem',
+  },
+  scoreRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '60px',
+  },
+  score: {
+    fontSize: '3.25rem',
+    fontWeight: '800',
+    letterSpacing: '-1px',
+  },
+  subtext: {
+    margin: '4px 0 0',
+    fontSize: '0.75rem',
+    color: '#6B7280',
+  },
+  controls: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.25rem',
+  },
+  sliderGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  sliderHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '0.85rem',
+  },
+  sliderLabel: {
+    color: '#D1D5DB',
+  },
+  sliderVal: {
+    fontWeight: '600',
+    color: '#60A5FA',
+  },
+  slider: {
+    width: '100%',
+    accentColor: '#3B82F6',
+    cursor: 'pointer',
+  }
+};
