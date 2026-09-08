@@ -5,8 +5,11 @@ import katex from 'katex';
 
 // Helper component to render KaTeX string
 function Latex({ math }) {
-  const html = katex.renderToString(math, { throwOnError: false });
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  const html = katex.renderToString(math, { 
+    throwOnError: false,
+    displayMode: true // Enforces display math layout with proper vertical spacing
+  });
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export default function App() {
@@ -45,8 +48,18 @@ export default function App() {
   const status = getStatus(successPercentage);
 
   // LaTeX string representation with live variables inserted
-  const rawLatex = `P(\\text{Success}) = \\frac{1}{1 + e^{-\\left[ \\left( P(L) - \\frac{\\varnothing}{1 + 0.5a} \\right) \\cdot \\mu \\cdot (1.25)^a - 1 \\right]}}`;
-  const liveLatex = `P(\\text{Success}) = \\frac{1}{1 + e^{-\\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \\cdot ${muVal} \\cdot (1.25)^{${aVal}} - 1 \\right]}}`;
+const rawLatex = `
+\\begin{aligned}
+P(\\text{Success}) &= \\frac{1}{1 + e^{-y}} \\[8pt]
+y &= \\left[ \\left( P(L) - \\frac{\\varnothing}{1 + 0.5a} \\right) \\cdot \\mu \\cdot (1.25)^a - 1 \\right]
+\\end{aligned}
+`;  
+const liveLatex = `
+\\begin{aligned}
+P(\\text{Success}) &= \\frac{1}{1 + e^{-(${exponentTerm.toFixed(2)})}} \\[8pt]
+y &= \\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \\cdot ${muVal} \\cdot (1.25)^{${aVal}} - 1 \\right] = ${exponentTerm.toFixed(2)}
+\\end{aligned}
+`;
 
   return (
     <div style={styles.container}>
@@ -225,12 +238,13 @@ const styles = {
     padding: '4px',
   },
   drawerContent: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: '12px',
-    padding: '12px',
+    padding: '16px 8px',
     marginTop: '8px',
-    overflow: 'hidden',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
+    overflowX: 'auto', // Adds smooth horizontal scroll if screen is very narrow
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    lineHeight: '1.8'
   },
   controls: { display: 'flex', flexDirection: 'column', gap: '1.25rem' },
   sliderGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
