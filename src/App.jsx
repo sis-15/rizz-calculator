@@ -114,33 +114,49 @@ y &= \\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \
         </div>
 
         {/* Formula Toggle Drawer */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <button 
-            onClick={() => setShowFormula(!showFormula)}
-            style={styles.drawerToggle}
-          >
-            {showFormula ? 'Hide Formula Breakdown ▲' : 'View Formula Breakdown ▼'}
-          </button>
+<div style={{ marginBottom: '1.5rem' }}>
+  <button 
+    onClick={() => setShowFormula(!showFormula)}
+    style={styles.drawerToggle}
+  >
+    {showFormula ? 'Hide Formula Breakdown ▲' : 'View Formula Breakdown ▼'}
+  </button>
 
-          <AnimatePresence>
-            {showFormula && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                style={styles.drawerContent}
-              >
-                <div style={{ fontSize: '0.9rem', overflowX: 'auto', padding: '8px 0', textAlign: 'center' }}>
-                  <Latex math={rawLatex} />
-                </div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '8px', paddingTop: '8px', fontSize: '0.8rem', color: '#9CA3AF', overflowX: 'auto', textAlign: 'center' }}>
-                  <strong>Evaluated State:</strong><br />
-                  <Latex math={liveLatex} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+  <AnimatePresence>
+    {showFormula && (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        style={styles.drawerContent}
+      >
+        {/* Step 1: Main Formula */}
+        <div style={{ padding: '4px 0' }}>
+          <Latex math={`P(\\text{Success}) = \\frac{1}{1 + e^{-y}}`} />
         </div>
+
+        {/* Step 2: Definition of y */}
+        <div style={{ padding: '8px 0' }}>
+          <Latex math={`y = \\left[ \\left( P(L) - \\frac{\\varnothing}{1 + 0.5a} \\right) \\cdot \\mu \\cdot (1.25)^a - 1 \\right]`} />
+        </div>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '12px 0 8px 0' }} />
+
+        {/* Step 3: Evaluated State */}
+        <div style={{ fontSize: '0.8rem', color: '#9CA3AF', marginBottom: '8px' }}>
+          <strong>Evaluated State:</strong>
+        </div>
+        <div style={{ padding: '4px 0' }}>
+          <Latex math={`y = \\left[ \\left( ${plVal} - \\frac{${pNotLVal}}{1 + 0.5(${aVal})} \\right) \\cdot ${muVal} \\cdot (1.25)^{${aVal}} - 1 \\right] = ${exponentTerm.toFixed(2)}`} />
+        </div>
+        <div style={{ padding: '4px 0' }}>
+          <Latex math={`P(\\text{Success}) = \\frac{1}{1 + e^{-(${exponentTerm.toFixed(2)})}} = ${(pSuccess * 100).toFixed(1)}\\%`} />
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
 
         {/* Controls */}
         <div style={styles.controls}>
